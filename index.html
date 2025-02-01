@@ -1,0 +1,112 @@
+
+  <title>Math Quiz Game</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-blue-50 flex flex-col items-center justify-center min-h-screen p-4">
+  <div class="bg-white shadow-lg rounded-2xl p-6 w-full max-w-md text-center">
+    <h1 class="text-3xl font-bold mb-4">Math Quiz Game</h1>
+    <div id="menu" class="space-y-4">
+      <button onclick="startGame('normal')" class="w-full bg-green-500 text-white py-2 rounded-xl shadow">Normal Mode</button>
+      <button onclick="startGame('timed')" class="w-full bg-red-500 text-white py-2 rounded-xl shadow">Timed Mode (1 min)</button>
+    </div>
+    
+    <div id="quiz" class="hidden">
+      <p id="timer" class="text-xl font-bold text-red-500 mb-2"></p>
+      <p id="score" class="text-xl font-bold text-blue-500 mb-2">Score: 0</p>
+      <p id="question" class="text-2xl font-semibold mb-4"></p>
+      <input type="number" id="answer" class="w-full p-2 border rounded-lg mb-4" placeholder="Your answer here">
+      <button onclick="submitAnswer()" class="bg-blue-500 text-white py-2 w-full rounded-xl shadow">Submit</button>
+      <p id="feedback" class="mt-4 text-lg"></p>
+    </div>
+
+    <div id="result" class="hidden">
+      <p id="finalScore" class="text-2xl font-bold mb-4"></p>
+      <button onclick="restartGame()" class="bg-purple-500 text-white py-2 w-full rounded-xl shadow">Play Again</button>
+    </div>
+  </div>
+
+  <script>
+    let correctAnswers = 0;
+    let totalQuestions = 0;
+    let timerInterval;
+    let timeLeft = 60;
+    let currentMode = '';
+
+    function startGame(mode) {
+      currentMode = mode;
+      correctAnswers = 0;
+      totalQuestions = 0;
+      document.getElementById('menu').classList.add('hidden');
+      document.getElementById('quiz').classList.remove('hidden');
+      document.getElementById('feedback').innerText = '';
+      document.getElementById('score').innerText = `Score: ${correctAnswers}`;
+      generateQuestion();
+
+      if (mode === 'timed') {
+        timeLeft = 60;
+        document.getElementById('timer').innerText = `Time Left: ${timeLeft}s`;
+        timerInterval = setInterval(() => {
+          timeLeft--;
+          document.getElementById('timer').innerText = `Time Left: ${timeLeft}s`;
+          if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            endGame();
+          }
+        }, 1000);
+      } else {
+        document.getElementById('timer').innerText = '';
+      }
+    }
+
+    function generateQuestion() {
+      const num1 = Math.floor(Math.random() * 20) + 1;
+      const num2 = Math.floor(Math.random() * 20) + 1;
+      const operations = ['+', '-', '*'];
+      const operation = operations[Math.floor(Math.random() * operations.length)];
+      const questionText = `${num1} ${operation} ${num2}`;
+      document.getElementById('question').innerText = questionText;
+      document.getElementById('question').dataset.answer = eval(questionText);
+    }
+
+    function submitAnswer() {
+      const userAnswer = parseInt(document.getElementById('answer').value);
+      const correctAnswer = parseInt(document.getElementById('question').dataset.answer);
+      totalQuestions++;
+
+      if (userAnswer === correctAnswer) {
+        correctAnswers++;
+        document.getElementById('feedback').innerText = 'Correct!';
+        document.getElementById('feedback').classList.add('text-green-500');
+        document.getElementById('feedback').classList.remove('text-red-500');
+      } else {
+        document.getElementById('feedback').innerText = `Wrong! The correct answer was ${correctAnswer}.`;
+        document.getElementById('feedback').classList.add('text-red-500');
+        document.getElementById('feedback').classList.remove('text-green-500');
+      }
+
+      document.getElementById('score').innerText = `Score: ${correctAnswers}`;
+      document.getElementById('answer').value = '';
+      if (currentMode === 'normal' || timeLeft > 0) {
+        generateQuestion();
+      }
+    }
+
+    function endGame() {
+      document.getElementById('quiz').classList.add('hidden');
+      document.getElementById('result').classList.remove('hidden');
+      document.getElementById('finalScore').innerText = `You got ${correctAnswers} out of ${totalQuestions} correct!`;
+    }
+
+    function restartGame() {
+      document.getElementById('result').classList.add('hidden');
+      document.getElementById('menu').classList.remove('hidden');
+    }
+
+    document.getElementById('answer').addEventListener('keydown', function(event) {
+      if (event.key === 'Enter') {
+        submitAnswer();
+      }
+    });
+  </script>
+</body>
+</html>
